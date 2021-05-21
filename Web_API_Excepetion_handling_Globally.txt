@@ -1,0 +1,46 @@
+Web API Excepetion handling Globally:
+-------------------------------------------- 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http.ExceptionHandling;
+using System.Web.Http.Results;
+
+namespace WebAPICall.CustomExceptionFilter
+{
+    public class CustomExceptionHandler:ExceptionHandler
+    {
+        public override async Task HandleAsync(ExceptionHandlerContext context, CancellationToken cancellationToken)
+        {
+            HttpStatusCode statusCode = HttpStatusCode.InternalServerError;
+            string erroMsg = string.Empty;
+            if (context.Exception !=null)
+            {
+                Exception filteredException = context.Exception;
+                if (filteredException.GetType()==typeof(NullReferenceException)
+                    || filteredException.GetType() == typeof(ArgumentNullException))
+                {
+                    statusCode = HttpStatusCode.NotFound;
+                    erroMsg = "Requested data is not found!";
+                }
+                else
+                {
+                    statusCode = HttpStatusCode.InternalServerError;
+                    erroMsg = "Application can not process the request now!";
+                }
+            }
+            var response = context.Request.CreateResponse(statusCode, erroMsg);
+            response.Headers.Add("X-Error", "From Exception Handler");
+            context.Result = new ResponseMessageResult(response);
+            await base.HandleAsync(context, cancellationToken);
+        }
+    }
+}
+----------------------------------------------------------- 
+WebApiConfig :
+ config.Services.Replace(typeof(IExceptionHandler),new CustomExceptionFilter.CustomExceptionHandler());

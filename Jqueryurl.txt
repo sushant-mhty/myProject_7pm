@@ -1,0 +1,22 @@
+Asp.Net Mvc Url.Action in external js file?
+-------------------------------------------
+Method 1:
+* In Razor Html Page : <div id="categoryData" data-request-url="@(Url.Action("GetAll","Category",new{area="Admin"}))"></div>
+* In .js file : 
+                    'ajax': {
+                            'url': $('#categoryData').data('request-url'),
+                            },
+                                    (or)
+                    $(function(){
+                       $('#categoryData').click(function(){
+                       var url = $(this).data('request-url');
+                       alert(url);
+                       });
+                    });
+Method2:
+* In Razor Html Page : @Html.Hidden("categoryData", Url.Action("GetAll", "Category", new { area = "Admin" }))
+* In .js file : 
+
+                 'ajax': {
+                        'url': $("#categoryData").val(),
+                         },
